@@ -1,7 +1,7 @@
 ﻿
 
 
-string[,] levelOne = new string[20,20];
+string[,] levelOne = new string[27,50];
 int PlayerX = 0, PlayerY = 0;
 bool a = true;
 int score = 0;
@@ -19,8 +19,8 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
     while (a)
     {
         Random ran1 = new Random();
-        int x = ran1.Next(20);
-        int y = ran1.Next(20);
+        int x = ran1.Next(27);
+        int y = ran1.Next(50);
         if (gameSpace[x, y] == "░░")
         {
             PlayerX = x;
@@ -53,7 +53,7 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
             }
             Console.WriteLine();
         }
-        Console.WriteLine("очки: " + score);
+        Console.Write("очки: " + score + "  || для перехода на новый уровень найдите дыру || для перезапуска карты нажмите f1  ");
         ConsoleKey key = Console.ReadKey().Key;
         if (key == ConsoleKey.W && gameSpace[PlayerX - 1,PlayerY] != "▓▓")
         {
@@ -70,6 +70,10 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
         if (key == ConsoleKey.D && gameSpace[PlayerX, PlayerY + 1] != "▓▓")
         {
             PlayerY++;
+        }
+        if (key == ConsoleKey.F1)
+        {
+            a = false;
         }
         Console.SetCursorPosition(0, 0);
         if (gameSpace[PlayerX, PlayerY] == "  ")
@@ -113,14 +117,22 @@ string[,] LevelGenerate(string[,] gameSpace)
                     gameSpace[i, j] = "░░";
                     break;
             }
+            if (i == 0||i==26)
+            {
+                gameSpace[i, j] = "▓▓";
+            }
+            if (j == 0 || j == 49)
+            {
+                gameSpace[i, j] = "▓▓";
+            }
         }
     }
     bool a =true;
     while (a)
     {
         Random ran1 = new Random();
-        int x = ran1.Next(20);
-        int y = ran1.Next(20);
+        int x = ran1.Next(27);
+        int y = ran1.Next(50);
 
         if (gameSpace[x, y] == "░░")
         {
