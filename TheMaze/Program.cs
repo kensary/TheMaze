@@ -1,6 +1,4 @@
-﻿
-
-
+﻿Console.ForegroundColor = ConsoleColor.DarkCyan;
 string[,] levelOne = new string[27,50];
 int PlayerX = 0, PlayerY = 0;
 bool a = true;
@@ -9,7 +7,7 @@ int score = 0;
 while (true)
 {
     levelOne = LevelGenerate(levelOne);
-    levelOne = Game(levelOne, "@@", a, PlayerX, PlayerY,ref score);
+    levelOne = Game(levelOne, "██", a, PlayerX, PlayerY,ref score);
 }
 
 string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int PlayerY,ref int score)
@@ -44,7 +42,9 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
             {
                 if (i == PlayerX && j ==PlayerY)
                 {
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.Write(player);
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
                 }
                 else
                 {
@@ -53,7 +53,9 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
             }
             Console.WriteLine();
         }
+        Console.ForegroundColor = ConsoleColor.White;
         Console.Write("очки: " + score + "  || для перехода на новый уровень найдите дыру || для перезапуска карты нажмите f1  ");
+        Console.ForegroundColor = ConsoleColor.DarkCyan;
         ConsoleKey key = Console.ReadKey().Key;
         if (key == ConsoleKey.W && gameSpace[PlayerX - 1,PlayerY] != "▓▓")
         {
