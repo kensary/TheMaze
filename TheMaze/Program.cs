@@ -6,12 +6,13 @@ int score = 0;
 
 while (true)
 {
-    levelOne = LevelGenerate(levelOne);
-    levelOne = Game(levelOne, "██", a, PlayerX, PlayerY,ref score);
+    levelOne = LevelGenerate(50,27);
+    Game(levelOne, "██", a, PlayerX, PlayerY,ref score);
 }
 
-string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int PlayerY,ref int score)
+static void Game(string[,] gameSpace,string player, bool a, int PlayerX, int PlayerY,ref int score)
 {
+    a = true;
     int startPosX = 0;
     int startPosY = 0;
     while (a)
@@ -19,7 +20,7 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
         Random ran1 = new Random();
         int x = ran1.Next(27);
         int y = ran1.Next(50);
-        if (gameSpace[x, y] == "░░")
+        if (gameSpace[x, y] == "  ")
         {
             PlayerX = x;
             startPosX = x;
@@ -31,7 +32,7 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
     a = true;
     while (a)
     {
-        if (gameSpace[PlayerX,PlayerY] == "▒▒")
+        if (gameSpace[PlayerX, PlayerY] == "▒▒")
         {
             PlayerX = startPosX;
             PlayerY = startPosY;
@@ -54,7 +55,7 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
             Console.WriteLine();
         }
         Console.ForegroundColor = ConsoleColor.White;
-        Console.Write("очки: " + score + "  || для перехода на новый уровень найдите дыру || для перезапуска карты нажмите f1  ");
+        Console.Write("очки: " + score + "  || для перехода на новый уровень найдите \"▄▀\" || для перезапуска карты нажмите f1  ");
         Console.ForegroundColor = ConsoleColor.DarkCyan;
         ConsoleKey key = Console.ReadKey().Key;
         if (key == ConsoleKey.W && gameSpace[PlayerX - 1,PlayerY] != "▓▓")
@@ -78,7 +79,7 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
             a = false;
         }
         Console.SetCursorPosition(0, 0);
-        if (gameSpace[PlayerX, PlayerY] == "  ")
+        if (gameSpace[PlayerX, PlayerY] == "▄▀")
         {
             PlayerX = startPosX;
             PlayerY = startPosY;
@@ -86,62 +87,93 @@ string[,] Game(string[,] gameSpace,string player, bool a, int PlayerX, int Playe
             score+= 1;
         }
     }
-    return gameSpace;
 }
-string[,] LevelGenerate(string[,] gameSpace)
+static void CreatePath(string[,] maze, int x, int y, Random rand)
 {
-    for (int i = 0; i < gameSpace.GetLength(0); i++)
+    int[] dirX = { 2, -2, 0, 0 }; // Движения по x
+    int[] dirY = { 0, 0, 2, -2 }; // Движения по y
+    int[] dirs = { 0, 1, 2, 3 }; // Направления
+
+    // Перемешиваем направления
+    for (int i = 0; i < dirs.Length; i++)
     {
-        for (int j = 0; j < gameSpace.GetLength(1); j++)
+        int j = rand.Next(i, dirs.Length);
+        int temp = dirs[i];
+        dirs[i] = dirs[j];
+        dirs[j] = temp;
+    }
+
+    // Генерация пути
+    foreach (int dir in dirs)
+    {
+        int newX = x + dirX[dir];
+        int newY = y + dirY[dir];
+
+        if (newX > 0 && newY > 0 && newX < maze.GetLength(1) && newY < maze.GetLength(0) && (maze[newY, newX] == "▓▓" || maze[newY, newX] == "▒▒"))
+        {
+            maze[newY, newX] = "  "; // Открываем путь
+            maze[y + dirY[dir] / 2, x + dirX[dir] / 2] = "  "; // Открываем стену между
+            CreatePath(maze, newX, newY, rand);
+        }
+    }
+}
+string[,] LevelGenerate(int width, int height)
+{
+    string[,] maze = new string[height, width + 1];
+
+    // Инициализация лабиринта стенами
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
         {
             Random ran = new Random();
-            switch (ran.Next(7))
+            switch (ran.Next(3))
             {
                 case 0:
-                    gameSpace[i, j] = "▒▒";
+                    maze[y, x] = "▓▓"; // Стена
                     break;
                 case 1:
-                    gameSpace[i, j] = "▓▓";
+                    maze[y, x] = "▒▒"; // Стена
                     break;
                 case 2:
-                    gameSpace[i, j] = "░░";
+                    maze[y, x] = "▒▒"; // Стена
                     break;
-                case 3:
-                    gameSpace[i, j] = "░░";
-                    break;
-                case 4:
-                    gameSpace[i, j] = "░░";
-                    break;
-                case 5:
-                    gameSpace[i, j] = "░░";
-                    break;
-                case 6:
-                    gameSpace[i, j] = "░░";
-                    break;
-            }
-            if (i == 0||i==26)
-            {
-                gameSpace[i, j] = "▓▓";
-            }
-            if (j == 0 || j == 49)
-            {
-                gameSpace[i, j] = "▓▓";
+
             }
         }
     }
-    bool a =true;
+    for (int i = 0; i < maze.GetLength(0); i++)
+    {
+        for (int j = 0; j < maze.GetLength(1); j++)
+        {
+            if (i == 0 || i == maze.GetLength(0) - 1)
+            {
+                maze[i, j] = "▓▓";
+            }
+            if (j == 0 || j == maze.GetLength(1) - 1)
+            {
+                maze[i, j] = "▓▓";
+            }
+        }
+    }
+
+    // Создание начальной точки
+    Random rand = new Random();
+    maze[1, 1] = "  "; // Путь
+    CreatePath(maze, 1, 1, rand);
+    a = true;
     while (a)
     {
         Random ran1 = new Random();
-        int x = ran1.Next(27);
-        int y = ran1.Next(50);
+        int x = ran1.Next(25);
+        int y = ran1.Next(40);
 
-        if (gameSpace[x, y] == "░░")
+        if (maze[x, y] == "  ")
         {
-            gameSpace[x, y] = "  ";
+            maze[x, y] = "▄▀";
             a = false;
         }
     }
-    return gameSpace;
+    return maze;
 }
 
